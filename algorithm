@@ -1,0 +1,38 @@
+PRIMARY(U, m):
+  repeat:
+    p ← random prime in [m, 2m]
+    bit_pos ← random in {0, …, m−1}
+    send(p, bit_pos, {u_k mod p}, {B(u_k, bit_pos)})      // Round 1
+
+    msg ← receive()
+    if msg = NO_MATCH: return NO
+    if msg = SINGLE(k, v_k):
+      if u_k = v_k: return YES
+      else: continue                                        // restart
+
+    (K1, q, fq, Qt) ← msg                                  // Round 2 bundle
+    K2 ← { k ∈ K1 : u_k mod q = fq[k]  AND  Q(u_k) = Qt[k] }
+    if K2 = ∅: return NO
+
+    k* ← random choice from K2
+    send(k*, u_k*)                                          // Round 3
+    if receive() = YES: return YES
+    // else restart
+
+
+SECONDARY(V, m):
+  repeat:
+    (p, bit_pos, fp, bp) ← receive()                       // Round 1
+    K1 ← { k : v_k mod p = fp[k]  AND  B(v_k, bit_pos) = bp[k] }
+    if K1 = ∅: send(NO_MATCH); return NO
+
+    if |K1| = 1:
+      k ← K1[0]
+      send(SINGLE, k, v_k); return                         // shortcut
+
+    q ← random prime in [2m+1, 4m], q ≠ p
+    send(K1, q, {v_k mod q}, {Q(v_k)})                    // Round 2 bundle
+
+    (k*, u_k*) ← receive()                                 // Round 3
+    if u_k* = v_k*: send(YES); return YES
+    else: send(RESTART)
