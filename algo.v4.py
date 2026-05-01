@@ -174,8 +174,8 @@ def primary(U, m):
         print(f"          Fingerprints q = {fps_q}")
         print(f"          Quarters       = {quarters_v}")
 
-        # Primary filters K1 → K2 by checking U's fingerprints/quarters against
-        # what Secondary sent (which were computed from V).
+        # Primary filters K1 → K2 by checking U's fingerprints/quarters against 
+        # the info that the Secondary sent (which were computed from V).
         K2 = []
         for i, k in enumerate(K1):
             if U[k] % q == fps_q[i] and quarter(U[k], m) == quarters_v[i]:
@@ -183,15 +183,10 @@ def primary(U, m):
 
         print(f"[PRIMARY] K2 (after filtering with q + quarters) = {K2}")
 
-        # Cost calculation for Round 2 (Secondary → Primary):
-        # - |K1| * log2(10) to send indices of candidates (approx 4 bits each)
-        # - log2(q) for the second prime
-        # - |K1| * log2(q) for the new fingerprints (v % q)
-        # - |K1| * 2 bits for the 'quarter' filters
-        bits_k1_idx = len(K1) * bits_needed(9)     # indices 0–9
+        bits_k1_idx = len(K1) * bits_needed(9)     
         bits_q      = bits_needed(q)
         bits_fps_q  = len(K1) * bits_needed(q)
-        bits_qtrs   = len(K1) * 2                  # 2 bits per quarter
+        bits_qtrs   = len(K1) * 2                  
         round2_bits = bits_k1_idx + bits_q + bits_fps_q + bits_qtrs
         log_bits(f"Round 2 (K1 indices + q + {len(K1)} fingerprints + {len(K1)} quarters)", round2_bits)
 
